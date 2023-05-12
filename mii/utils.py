@@ -83,10 +83,13 @@ def _get_hf_models_by_type(model_type, task=None):
     models = ([m.modelId for m in models]
               if task is None else [m.modelId for m in models if m.pipeline_tag == task])
     if task == TEXT_GENERATION_NAME:
-        # TODO: this is a temp solution to get around some HF models not having the correct tags
-        models.append("microsoft/bloom-deepspeed-inference-fp16")
-        models.append("microsoft/bloom-deepspeed-inference-int8")
-        models.append("EleutherAI/gpt-neox-20b")
+        models.extend(
+            (
+                "microsoft/bloom-deepspeed-inference-fp16",
+                "microsoft/bloom-deepspeed-inference-int8",
+                "EleutherAI/gpt-neox-20b",
+            )
+        )
     return models
 
 
@@ -96,14 +99,22 @@ def _get_supported_models_name(task):
     task_name = get_task_name(task)
 
     for model_type, provider in SUPPORTED_MODEL_TYPES.items():
-        if provider == ModelProvider.HUGGING_FACE:
-            models = _get_hf_models_by_type(model_type, task_name)
-        elif provider == ModelProvider.HUGGING_FACE_LLM:
-            models = _get_hf_models_by_type(model_type, task_name)
-        elif provider == ModelProvider.ELEUTHER_AI:
-            if task_name == TEXT_GENERATION_NAME:
-                models = [model_type]
-        elif provider == ModelProvider.DIFFUSERS:
+        if (
+            provider != ModelProvider.HUGGING_FACE
+            and provider != ModelProvider.HUGGING_FACE_LLM
+            and provider == ModelProvider.ELEUTHER_AI
+            and task_name == TEXT_GENERATION_NAME
+        ):
+            models = [model_type]
+        elif (
+            provider == ModelProvider.HUGGING_FACE
+            or provider == ModelProvider.HUGGING_FACE_LLM
+            or provider != ModelProvider.ELEUTHER_AI
+        ) and provider in [
+            ModelProvider.HUGGING_FACE,
+            ModelProvider.HUGGING_FACE_LLM,
+            ModelProvider.DIFFUSERS,
+        ]:
             models = _get_hf_models_by_type(model_type, task_name)
         supported_models.extend(models)
     if not supported_models:
@@ -126,15 +137,13 @@ def check_if_task_and_model_is_valid(task, model_name):
 
 
 def full_model_path(model_path):
-    aml_model_dir = os.environ.get('AZUREML_MODEL_DIR', None)
-    if aml_model_dir:
+    if aml_model_dir := os.environ.get('AZUREML_MODEL_DIR', None):
         # (potentially) append relative model_path w. aml path
         assert os.path.isabs(aml_model_dir), f"AZUREML_MODEL_DIR={aml_model_dir} must be an absolute path"
-        if model_path:
-            assert not os.path.isabs(model_path), f"model_path={model_path} must be relative to append w. AML path"
-            return os.path.join(aml_model_dir, model_path)
-        else:
+        if not model_path:
             return aml_model_dir
+        assert not os.path.isabs(model_path), f"model_path={model_path} must be relative to append w. AML path"
+        return os.path.join(aml_model_dir, model_path)
     elif model_path:
         return model_path
     else:

@@ -50,15 +50,10 @@ class ModelResponse(ServiceBase):
             model_times = model.model_times()
 
         if len(model_times) > 0:
-            if sum_times:
-                model_time = sum(model_times)
-            else:
-                # Unclear how to combine values, so just grab the most recent one
-                model_time = model_times[-1]
+            return sum(model_times) if sum_times else model_times[-1]
         else:
             # no model times were captured
-            model_time = -1
-        return model_time
+            return -1
 
     def _run_inference(self, method_name, request_proto):
         if method_name not in self.method_name_to_task:
@@ -210,9 +205,9 @@ def _do_serve(service_impl, port, interceptors=[]):
                                    GRPC_MAX_MSG_SIZE)])
     modelresponse_pb2_grpc.add_ModelResponseServicer_to_server(service_impl, server)
     server.add_insecure_port(f'[::]:{port}')
-    print(f"About to start server")
+    print("About to start server")
     server.start()
-    print(f"Started")
+    print("Started")
     stop_event.wait()
     server.stop(SERVER_SHUTDOWN_TIMEOUT)
 

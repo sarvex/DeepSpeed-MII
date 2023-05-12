@@ -39,7 +39,7 @@ class BloomPipeline(object):
             self.model = self.model.module
 
         # expand proto list into py-list
-        inputs = [i for i in inputs]
+        inputs = list(inputs)
         tokens = self.tokenizer.batch_encode_plus(inputs,
                                                   return_tensors="pt",
                                                   padding=True)
@@ -50,12 +50,7 @@ class BloomPipeline(object):
         greedy_output = self.model.generate(**tokens, **kwargs)
         outputs = self.tokenizer.batch_decode(greedy_output, skip_special_tokens=True)
 
-        # construct output to align w. HF pipeline
-        output_dicts = []
-        for output in outputs:
-            output_dicts.append([{'generated_text': output}])
-
-        return output_dicts
+        return [[{'generated_text': output}] for output in outputs]
 
 
 def get_checkpoint_files(model_name, model_path):
@@ -139,8 +134,7 @@ def create_checkpoint_dict(model_name, model_path, mii_config):
             checkpoint_files = get_checkpoint_files(model_name, model_path)
         else:
             checkpoint_files = get_checkpoint_files_old(model_name)
-        data = {"type": "BLOOM", "checkpoints": checkpoint_files, "version": 1.0}
-        return data
+        return {"type": "BLOOM", "checkpoints": checkpoint_files, "version": 1.0}
 
 
 def _attempt_load(load_fn, model_name, cache_path, kwargs={}):
@@ -173,7 +167,6 @@ def load_hf_llm(model_path, model_name, task_name, mii_config):
     model = model.eval()
     checkpoint_dict = create_checkpoint_dict(model_name, model_path, mii_config)
     torch.distributed.barrier()
-    inference_pipeline = BloomPipeline(model=model,
-                                       tokenizer=tokenizer,
-                                       checkpoint_dict=checkpoint_dict)
-    return inference_pipeline
+    return BloomPipeline(
+        model=model, tokenizer=tokenizer, checkpoint_dict=checkpoint_dict
+    )

@@ -24,11 +24,13 @@ ds_config = {
     "train_micro_batch_size_per_gpu": 1,
 }
 
-mii.deploy(task='text-generation',
-           model=name,
-           deployment_name=name + "_deployment",
-           model_path=".cache/models/" + name,
-           mii_config=mii_config,
-           enable_deepspeed=False,
-           enable_zero=True,
-           ds_config=ds_config)
+mii.deploy(
+    task='text-generation',
+    model=name,
+    deployment_name=f"{name}_deployment",
+    model_path=f".cache/models/{name}",
+    mii_config=mii_config,
+    enable_deepspeed=False,
+    enable_zero=True,
+    ds_config=ds_config,
+)

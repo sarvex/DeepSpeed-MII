@@ -51,7 +51,7 @@ class ImageResponse():
         if self._deserialized_images is None:
             from PIL import Image
             images = []
-            for idx, img_bytes in enumerate(self._response.images):
+            for img_bytes in self._response.images:
                 size = (self._response.size_w, self._response.size_h)
                 img = Image.frombytes(self._response.mode, size, img_bytes)
                 images.append(img)

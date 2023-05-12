@@ -89,11 +89,11 @@ def deploy(task,
 
     if enable_deepspeed:
         logger.info(
-            f"************* MII is using DeepSpeed Optimizations to accelerate your model *************"
+            "************* MII is using DeepSpeed Optimizations to accelerate your model *************"
         )
     else:
         logger.info(
-            f"************* DeepSpeed Optimizations not enabled. Please use enable_deepspeed to get better performance *************"
+            "************* DeepSpeed Optimizations not enabled. Please use enable_deepspeed to get better performance *************"
         )
 
     # In local deployments use default path if no model path set
@@ -179,11 +179,16 @@ def _allocate_processes(hostfile_path, tensor_parallel, num_replicas):
 
             allocated_num_on_host = slots - available_on_host
             replica_pool.append(
-                (host,
-                 [
-                     i for i in range(allocated_num_on_host,
-                                      allocated_num_on_host + tensor_parallel)
-                 ]))
+                (
+                    host,
+                    list(
+                        range(
+                            allocated_num_on_host,
+                            allocated_num_on_host + tensor_parallel,
+                        )
+                    ),
+                )
+            )
             allocated_num += 1
 
             available_on_host -= tensor_parallel

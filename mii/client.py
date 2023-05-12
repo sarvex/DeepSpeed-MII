@@ -99,13 +99,12 @@ class MIITensorParallelClient():
 
     # runs task in parallel and return the result from the first task
     async def _query_in_tensor_parallel(self, request_string, query_kwargs):
-        responses = []
-        for client in self.clients:
-            responses.append(
-                self.asyncio_loop.create_task(
-                    client._request_async_response(request_string,
-                                                   **query_kwargs)))
-
+        responses = [
+            self.asyncio_loop.create_task(
+                client._request_async_response(request_string, **query_kwargs)
+            )
+            for client in self.clients
+        ]
         await responses[0]
         return responses[0]
 
@@ -125,8 +124,7 @@ class MIITensorParallelClient():
         response = self.asyncio_loop.run_until_complete(
             self._query_in_tensor_parallel(request_dict,
                                            query_kwargs))
-        ret = response.result()
-        return ret
+        return response.result()
 
     def terminate(self):
         """Terminates the deployment"""

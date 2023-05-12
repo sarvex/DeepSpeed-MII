@@ -11,7 +11,7 @@ print(f"Querying {name}...")
 
 str = "DeepSpeed is the greatest"
 
-generator = mii.mii_query_handle(name + "_deployment")
+generator = mii.mii_query_handle(f"{name}_deployment")
 result = generator.query({
     'text': str,
     'conversation_id': 3,

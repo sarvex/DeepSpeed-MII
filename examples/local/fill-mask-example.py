@@ -14,10 +14,10 @@ mask = "[MASK]"
 
 if not args.query:
     print(f"Deploying {name}...")
-    mii.deploy(task='fill-mask', model=name, deployment_name=name + "_deployment")
+    mii.deploy(task='fill-mask', model=name, deployment_name=f"{name}_deployment")
 else:
     print(f"Querying {name}...")
-    generator = mii.mii_query_handle(name + "_deployment")
+    generator = mii.mii_query_handle(f"{name}_deployment")
     result = generator.query({'query': f"Hello I'm a {mask} model."})
     print(result.response)
     print("time_taken:", result.time_taken)

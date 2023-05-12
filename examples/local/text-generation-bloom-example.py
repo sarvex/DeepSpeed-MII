@@ -11,8 +11,10 @@ mii_configs = {
 }
 name = "microsoft/bloom-deepspeed-inference-fp16"
 
-mii.deploy(task='text-generation',
-           model=name,
-           deployment_name=name + "_deployment",
-           model_path="/data/bloom-mp",
-           mii_config=mii_configs)
+mii.deploy(
+    task='text-generation',
+    model=name,
+    deployment_name=f"{name}_deployment",
+    model_path="/data/bloom-mp",
+    mii_config=mii_configs,
+)

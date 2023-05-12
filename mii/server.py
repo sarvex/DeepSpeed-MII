@@ -235,8 +235,7 @@ class MIIServer():
                                                   ds_config,
                                                   mii_configs,
                                                   port)
-        server_args_str += f" " + \
-            " ".join(ex_server_args) if ex_server_args else ""
+        server_args_str += (" " + " ".join(ex_server_args)) if ex_server_args else ""
 
         if ds_launch_str is None:
             cmd = f'{launch_str} {server_args_str}'.split(" ")

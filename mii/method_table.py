@@ -36,7 +36,7 @@ def proto_request_to_single_input(request):
 
 
 def proto_request_to_list(request):
-    args = ([r for r in request.request], )
+    args = (list(request.request), )
     kwargs = unpack_proto_query_kwargs(request.query_kwargs)
     return args, kwargs
 

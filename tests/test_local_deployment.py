@@ -116,16 +116,17 @@ def deployment_config(task_name: str,
                       enable_deepspeed: bool,
                       enable_zero: bool,
                       ds_config: dict):
-    config = SimpleNamespace(task=task_name,
-                             model=model_name,
-                             deployment_type=mii.DeploymentType.LOCAL,
-                             deployment_name=model_name + "_deployment",
-                             model_path=os.getenv("TRANSFORMERS_CACHE",
-                                                  None),
-                             mii_config=mii_configs,
-                             enable_deepspeed=enable_deepspeed,
-                             enable_zero=enable_zero,
-                             ds_config=ds_config)
+    config = SimpleNamespace(
+        task=task_name,
+        model=model_name,
+        deployment_type=mii.DeploymentType.LOCAL,
+        deployment_name=f"{model_name}_deployment",
+        model_path=os.getenv("TRANSFORMERS_CACHE", None),
+        mii_config=mii_configs,
+        enable_deepspeed=enable_deepspeed,
+        enable_zero=enable_zero,
+        ds_config=ds_config,
+    )
     validate_config(config)
     return config
 

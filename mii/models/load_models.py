@@ -42,7 +42,10 @@ def load_models(task_name,
     if provider == mii.constants.ModelProvider.HUGGING_FACE:
         from mii.models.providers.huggingface import hf_provider
         if "bigscience/bloom" in model_name:
-            assert mii_config.dtype == torch.half or mii_config.dtype == torch.int8, "Bloom models only support fp16/int8"
+            assert mii_config.dtype in [
+                torch.half,
+                torch.int8,
+            ], "Bloom models only support fp16/int8"
             assert mii_config.enable_cuda_graph == False, "Bloom models do no support Cuda Graphs"
         inference_pipeline = hf_provider(model_path, model_name, task_name, mii_config)
     elif provider == mii.constants.ModelProvider.ELEUTHER_AI:
@@ -59,14 +62,19 @@ def load_models(task_name,
         inf_config["config"] = inference_pipeline.neox_args
     elif provider == mii.constants.ModelProvider.HUGGING_FACE_LLM:
         from mii.models.providers.llm import load_hf_llm
-        assert mii_config.dtype == torch.half or mii_config.dtype == torch.int8, "Bloom models only support fp16/int8"
+        assert mii_config.dtype in [
+            torch.half,
+            torch.int8,
+        ], "Bloom models only support fp16/int8"
         assert mii_config.enable_cuda_graph == False, "Bloom models do no support Cuda Graphs"
         inference_pipeline = load_hf_llm(model_path, model_name, task_name, mii_config)
         inf_config["checkpoint"] = inference_pipeline.checkpoint_dict
-        if mii_config.dtype == torch.int8:
-            if "enable_qkv_quantization" in inspect.signature(
-                    deepspeed.init_inference).parameters:
-                inf_config["enable_qkv_quantization"] = True
+        if (
+            mii_config.dtype == torch.int8
+            and "enable_qkv_quantization"
+            in inspect.signature(deepspeed.init_inference).parameters
+        ):
+            inf_config["enable_qkv_quantization"] = True
     elif provider == mii.constants.ModelProvider.DIFFUSERS:
         from mii.models.providers.diffusers import diffusers_provider
         inference_pipeline = diffusers_provider(model_path,

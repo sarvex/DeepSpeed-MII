@@ -57,7 +57,7 @@ def run(request):
 
     time_taken = response.time_taken
     if not isinstance(response.response, str):
-        response = [r for r in response.response]
+        response = list(response.response)
     return json.dumps({'responses': response, 'time': time_taken})
 
 
